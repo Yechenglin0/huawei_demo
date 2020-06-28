@@ -137,7 +137,6 @@ public class CountDouble {
 
         // 归一化
         double W1             = eigenValue1.trace();      //求和
-        Logger.i("trace:" + W1);
         eigenValue1           = eigenValue1.times(1/W1);//归一化
         normalized_max_eig[0] = get_max_eig(Matrix_to_Array(eigenValue1, 50));//取出归一化之后的最大特征值
 
@@ -163,7 +162,7 @@ public class CountDouble {
 
             newcsi1 = empty_arr(newcsi1);
             newcsi1 = clone_to_array(Nor_subCSI, newcsi1 ,i ,i + len - 1,0, Nor_subCSI[0].length - 1);
-//            if (0 == i) {
+            if (0 == i) {
                 for (int n = 0; n < len; n++) {
                     for (int k = n; k < len; k++) {
                         double[] a     = newcsi1[n];
@@ -173,25 +172,25 @@ public class CountDouble {
                         Amplitude_CoffValue[k][n] = Amplitude_CoffValue[n][k];
                     }
                 }
-//                temporary_matrix = empty_arr(temporary_matrix);
-//                temporary_matrix = clone_to_array(Amplitude_CoffValue, temporary_matrix, 1,len-1,1,len-1);
-//            }
+                temporary_matrix = empty_arr(temporary_matrix);
+                temporary_matrix = clone_to_array(Amplitude_CoffValue, temporary_matrix, 1,len-1,1,len-1);
+            }
 
-//            if (0 != i) {
-//                Amplitude_CoffValue = empty_arr(Amplitude_CoffValue);
-//                Amplitude_CoffValue = clone_to_array(temporary_matrix, Amplitude_CoffValue, 0,len-2,0,len-2);
-//
-//                int k = len - 1;
-//                for (int n = 0; n < len; n++) {
-//                    double[] a = newcsi1[n];
-//                    double[] b = newcsi1[k];
-//                    double csi_cor = getPearsonCorrelationScore(a,b);            //求所有子载波幅值矢量之间的相关系数
-//                    Amplitude_CoffValue[n][k] = csi_cor;
-//                    Amplitude_CoffValue[k][n] = Amplitude_CoffValue[n][k];
-//                }
-//                temporary_matrix = empty_arr(temporary_matrix);
-//                temporary_matrix = clone_to_array(Amplitude_CoffValue, temporary_matrix, 1,len-1,1,len-1);
-//            }
+            if (0 != i) {
+                Amplitude_CoffValue = empty_arr(Amplitude_CoffValue);
+                Amplitude_CoffValue = clone_to_array(temporary_matrix, Amplitude_CoffValue, 0,len-2,0,len-2);
+
+                int k = len - 1;
+                for (int n = 0; n < len; n++) {
+                    double[] a = newcsi1[n];
+                    double[] b = newcsi1[k];
+                    double csi_cor = getPearsonCorrelationScore(a,b);            //求所有子载波幅值矢量之间的相关系数
+                    Amplitude_CoffValue[n][k] = csi_cor;
+                    Amplitude_CoffValue[k][n] = Amplitude_CoffValue[n][k];
+                }
+                temporary_matrix = empty_arr(temporary_matrix);
+                temporary_matrix = clone_to_array(Amplitude_CoffValue, temporary_matrix, 1,len-1,1,len-1);
+            }
 
             Matrix A = new Matrix(Amplitude_CoffValue);                         //对矩阵进行特征值分解
             Matrix eigenValue1 = A.eig().getD();                                //取出幅度特征值
