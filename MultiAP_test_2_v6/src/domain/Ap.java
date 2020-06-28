@@ -19,7 +19,6 @@ public class Ap {
     private int minutesOfCollectingSilentData;//需要采集的静态数据时间 0代表不需要，1代表需要采集1分钟，2代表两分钟，以此类推
     private  double[][] tempMatrix;
 
-
     //getter和setter
     public String getMac() {
         return mac;

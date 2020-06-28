@@ -29,45 +29,6 @@ public class Activator {
         //初始化日志前缀，方便在路由器上查看debug信息
         Logger.init(PREFIX, "./");
 
-        //设置计算出入侵结果的监听器
-        //WifisenseCommand.reportData()函数目前是写的空。
-//        Processor.setOnIntrusionListener(new Processor.onIntrusionListener() {
-//            /**
-//             * @param collector 侦听者
-//             * @param isInvaded 侦听者和<aor>的链路是否满足逻辑关系
-//             */
-//            @Override
-//            public void onAlarmed(Ap collector, boolean isInvaded) {
-//                Logger.i("侦听者%s管理的区域是否有告警:%b", collector.getMac(), isInvaded);//输出
-//                int dateValue = isInvaded ? 1 : 0;
-//                //上报数据到云上
-////                WifisenseCommand.reportData("motionAlarm", "motionAlarm1", "alarm", dateValue);
-//            }
-//
-//            /**
-//             * @param collector 侦听者
-//             * @param isSensed 侦听者和<sor><sand>的链路是否满足逻辑关系
-//             */
-//            @Override
-//            public void onSensed(Ap collector, boolean isSensed) {
-//                Logger.i("侦听者%s管理的区域是否有区域感知:%b", collector.getMac(), isSensed);
-//                int dateValue = isSensed ? 1 : 0;
-//                //上报数据到云上
-////                WifisenseCommand.reportData("motionSensor", "motionSensor1", "alarm", dateValue);
-//            }
-//
-//            /**
-//             * 当侦听者的和<sor><sand>之间的链路已经持续五分钟无任何链路被入侵的时候，此方法会被调用
-//             * @param collector 侦听者
-//             */
-//            @Override
-//            public void onNoSensed(Ap collector) {
-//                Logger.i("侦听者%s管理的区域已经五分钟没有入侵了");
-//                //上报数据到云上
-////                WifisenseCommand.reportData("motionSensor", "motionSensor1", "noAlarm", 1);
-//            }
-//        });
-
         //创建定时线程池
         ScheduledExecutorService pool = Executors.newScheduledThreadPool(1);
 

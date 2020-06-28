@@ -122,8 +122,8 @@ public class CountDouble {
         double[][] temporary_matrix    = new double[len - 1][len - 1];
         double[] normalized_max_eig    = new double[len];
 
-        for (int n = 0; n < len - 1; n++) {
-            for (int k = n; k < len - 1; k++) {
+        for (int n = 0; n < len; n++) {
+            for (int k = n; k < len; k++) {
                 double[] a     = newcsi1[n];
                 double[] b     = newcsi1[k];
                 double csi_cor = getPearsonCorrelationScore(a,b);
