@@ -1,5 +1,6 @@
 package com.demo;
 
+import PanelInfor.PanelShow;
 import domain.CsiInfo;
 import domain.Ap;
 import util.Caches;
@@ -7,10 +8,9 @@ import util.CountDouble;
 import util.DateUtils;
 import util.Logger;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Queue;
+import javax.swing.*;
+import java.text.SimpleDateFormat;
+import java.util.*;
 
 import static util.FileUtils.ROOT_DIR;
 import static util.FileUtils.write2txt;
@@ -33,7 +33,9 @@ public class Processor {
     public static void preProcess() {
         Logger.i("进入preProcess函数");
     }
-
+    public static void scrollAndSetCursor(JTextArea ta){
+        ta.setSelectionStart(ta.getText().length());
+    }
     /**
      * 根据RSSI计算出阈值和入侵结果
      *
@@ -44,7 +46,6 @@ public class Processor {
         Logger.i("接受到" + count2 + "个包");
         String format = csi.toString();
         write2txt(STATIC_OUTPUT_TXT, format);
-
         Logger.i("进入processReceiveCSI函数");
         long startTime = System.currentTimeMillis();    //获取开始时间
 
@@ -52,9 +53,6 @@ public class Processor {
         String pre_timestamp = Ap.getTimestampFromLink(collector);
         String timestamp = csi.get_timestamp();
         Ap.setTimestampFromLink(collector, timestamp);
-
-//        Logger.i("上一个时间戳：" + pre_timestamp);
-//        Logger.i("当前时间戳：" + timestamp);
 
         if (Ap.getThresholdFromLink(collector) != null && Ap.getThresholdFromLink(collector) != 0) {
             collector.setMinutesOfCollectingSilentData(0);          //采集过了就设置为不需要再采集了
@@ -64,16 +62,18 @@ public class Processor {
             staticDataList.add(csi.toJsonString(csi));//将csi添加进list
             Ap.setStaticDataListFromLink(collector, staticDataList);
             Logger.i("静态数据长度:" + staticDataList.size());
-
             if (staticDataList.size() >= collector.getMinutesOfCollectingSilentData() * 300 * COUNTS_PER_SECOND) {//已经采集够了足够的数据
-                Logger.i("开始阈值计算");
+                Activator.textArea.append("已经收到" + staticDataList.size() + "个包，开始阈值计算" + '\n');
+
                 double upBound = CountDouble.calUpbound(staticDataList);//根据静态数组计算阈值
                 Ap.setThresholdFromLink(collector, upBound);
+                Activator.textArea.append("阈值结果为：" + upBound + '\n');
                 collector.setMinutesOfCollectingSilentData(0);          //采集过了就设置为不需要再采集了
             }
         } else if (Ap.getThresholdFromLink(collector) != null) {
             List<String> apDataList = Ap.getDataListFromLink(collector);
             Double thresholdValue   = Ap.getThresholdFromLink(collector); //获得阈值
+
             apDataList.add(csi.toJsonString(csi));//将csi添加进list
             Ap.setDataListFromLink(collector, apDataList);
             Logger.i("读取数据，数据长度为：" + apDataList.size());
@@ -91,27 +91,16 @@ public class Processor {
                 double[][] tempMatrix = Ap.getTempMatrixFromLink(collector);
                 tempMatrix = CountDouble.get_temp_matrix_next_win(apDataList, tempMatrix);
                 Ap.setTempMatrixFromLink(collector, tempMatrix);
-//                double fvalue = CountDouble.cal_next_win(tempMatrix);
-                double fvalue = CountDouble.calDetection(thresholdValue, apDataList);//计算结果：0代表没人，1代表有人
-                int at = -1;//结果1代表有人，0代表没人
-                if (fvalue < thresholdValue * 0.975) {
-                    at = 1;
-                } else {
-                    at = 0;
-                }
+                double fvalue = CountDouble.cal_next_win(tempMatrix);//简便计算
+                int at = fvalue < thresholdValue * 0.975 ? 1 : 0;//结果1代表有人，0代表没人
 
                 String format3 = String.valueOf(fvalue);
                 write2txt(STATIC_FVALUE_TXT, format3);
 
-
                 List<Integer> invadedList = Ap.getInvadedListFromLink(collector);
                 invadedList.add(at);
                 Ap.setInvadedListFromLink(collector,invadedList);
-//                String pre_second = pre_timestamp.substring(17,19);
-//                String second = timestamp.substring(17,19);
-//                Logger.i("上一个秒数为：" + pre_second);
-//                Logger.i("当前秒数为：" + second);
-                if (invadedList.size() >= 200) {
+                if (invadedList.size() >= 100) {
 
                     int sum = 0;
                     String output;
@@ -119,15 +108,19 @@ public class Processor {
                         sum = sum + invadedList.get(i);
                     }
                     if (sum > invadedList.size() * 0.4) {
-                        output = "true";
-                        Logger.i("有人入侵!!!!!!!!!!!!!!!!!!!!!!!!!!!!!!");
+                        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
+                        output = "有人入侵！！！" + df.format(new Date()) + '\n';
+                        try {
+                            PanelShow.detection();
+                        } catch (Exception e) {
+                            e.printStackTrace();
+                        }
                     } else {
-                        output = "false";
-                        Logger.i("无人————————————————————————————————————————————");
+                        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
+                        output = "安全！        " + df.format(new Date()) + '\n';
                     }
-//                    String format2 = output;
-//                    write2txt(STATIC_OUTPUT_TXT, format2);
-
+                    Activator.textArea.append(output);
+                    Activator.textArea.setSelectionStart(Activator.textArea.getText().length());
                     List<Integer> invadedList2 = new ArrayList<>();
                     Ap.setInvadedListFromLink(collector,invadedList2);
                 }

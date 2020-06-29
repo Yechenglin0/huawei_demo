@@ -6,8 +6,6 @@ import java.net.*;
 public class SendSock {
     static int count2 = 0;
     public static void main(String[] args) throws IOException {
-
-
         FileReader fr = new FileReader("4s_4d_4s_json.txt");
         DatagramSocket ds = new DatagramSocket(8080);
 
@@ -28,18 +26,14 @@ public class SendSock {
                 dp.setSocketAddress(new InetSocketAddress("127.0.0.1",8000));
                 ds.send(dp);
                 sendStr = "";
-                count=0;
+                count = 0;
             }
             if (count2 == 2000) {
                 long endTime = System.currentTimeMillis();    //获取结束时间
-                System.out.println("发包时间：" + (endTime - startTime) + "ms");    //输出程序运行时间
             }
-
         }
         ds.close();
         fr.close();
-
-
     }
 
 

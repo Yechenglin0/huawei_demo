@@ -1,10 +1,13 @@
 package com.demo;
 
+import PanelInfor.PanelShow;
 import com.google.gson.Gson;
 import domain.Ap;
 import domain.CsiInfo;
 import util.Logger;
 
+import javax.swing.*;
+import java.awt.*;
 import java.io.IOException;
 import java.net.InetSocketAddress;
 import java.nio.ByteBuffer;
@@ -20,6 +23,25 @@ import java.util.concurrent.TimeUnit;
  *
  */
 public class Activator {
+
+    static JScrollPane jsp;
+    public static JTextArea textArea = new JTextArea(15,65);
+    static {
+        JPanel panel = new JPanel();
+        JFrame jf = new JFrame("测试窗口");
+
+        jf.setSize(630,400);
+        jf.setLocationRelativeTo(null);
+
+        jsp = new JScrollPane(textArea);
+        textArea.setLineWrap(true);
+        textArea.setFont(new Font("黑体",Font.BOLD,18));
+
+        panel.add(jsp);
+
+        jf.setContentPane(panel);
+        jf.setVisible(true);
+    }
     //本地端口号
     private static final int LOCAL_PORT = 8000;
     //Logger的输出前缀
@@ -40,7 +62,6 @@ public class Activator {
                 //启用UDP接受字节数组并解析算法处理。此方法为阻塞方法。
                 receiveWithUDP();
             }
-
         }, 0, TimeUnit.SECONDS);
     }
 
@@ -232,7 +253,6 @@ public class Activator {
             e.printStackTrace();
         }
     }
-
 
     /**
      * 将30行json字符串转成CsiInfo对象

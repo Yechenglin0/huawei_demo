@@ -1,5 +1,6 @@
 package util;
 
+import com.demo.Activator;
 import domain.Ap;
 import java.util.HashMap;
 import java.util.Map;
@@ -22,6 +23,7 @@ public class Caches {
         Ap ap = new Ap();
         ap.setMac(mac);
         ap.setMinutesOfCollectingSilentData(1);
+        Activator.textArea.append("开始收集静态数据\n");
         apCaches.put(mac, ap);
         return ap;
     }

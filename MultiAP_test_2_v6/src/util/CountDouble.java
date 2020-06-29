@@ -22,7 +22,6 @@ public class CountDouble {
      * @return 根据静态文件计算得到的阈值
      */
     public static double calUpbound(List<String> staticDataList) {
-        long startTime = System.currentTimeMillis();    //获取开始时间
 
         double[][] subCSI = get_Nor_subCSI(staticDataList, 2);
         double[][] Nor_subCSI = new double[subCSI.length][27];
@@ -41,10 +40,6 @@ public class CountDouble {
 
         //根据核函数计算阈值
         double res = getUpbound(normalized_max_eig,0.05);
-
-        long endTime = System.currentTimeMillis();    //获取结束时间
-        System.out.println("阈值计算运行时间：" + (endTime - startTime) + "ms");    //输出程序运行时间
-
         return res;
     }
 
@@ -80,7 +75,6 @@ public class CountDouble {
         Matrix eigenValue1 = A.eig().getD();                                    //取出幅度特征值
         // 归一化
         double W1          = eigenValue1.trace();                               //求和
-        Logger.i("W1 = " + W1);
         eigenValue1        = eigenValue1.times(1/W1);                           //归一化
         double fvalue      = get_max_eig(Matrix_to_Array(eigenValue1, 50));//取出归一化之后的最大特征值
 
@@ -244,8 +238,6 @@ public class CountDouble {
      */
     public static double[][] get_Nor_subCSI(List<String> staticDataList, int ant_num) {
 
-        Logger.i("长度为：" + staticDataList.size());
-
         // 提取每个包的CSI幅值数据,进行天线选择，最后得到一个60*30的二维数组
         Gson gson = new Gson();
         String timestamp = new String();
@@ -256,7 +248,6 @@ public class CountDouble {
         String mac = new String();
         for(int i = 0; i < staticDataList.size(); i++) {
             CsiInfo packet = gson.fromJson(staticDataList.get(i), CsiInfo.class);
-//            Logger.i("数据为："+staticDataList.get(i));
             timestamp   = packet.get_timestamp();
             ant1_amp[i] = packet.get_total_ant1_amp();
             ant2_amp[i] = packet.get_total_ant2_amp();
@@ -484,12 +475,9 @@ public class CountDouble {
 
         double[] low_bound = new double[]{min - 0.001, 0};
         int index_len      = (int)  ((max + 0.001 - getMax(low_bound)) / step);
-        Logger.i("index_len = " + index_len + " max = " + max + " min = " + min);
         double[] index     = new double[index_len];
         double[] fx        = new double[1000];
         double[] storeOfFX = new double[1000];
-        Logger.i(index_len);
-        System.out.println("-----------------------------2.2-----------------------------------");
 
         for (int i = 0; i < index_len; i++) {
             index[i] = getMax(low_bound) + i * step;
@@ -506,12 +494,9 @@ public class CountDouble {
                 break;
             }
         }
-        System.out.println("-----------------------------2.2-----------------------------------");
-
         if (upbound == 0) {
             upbound = index[index_len];
         }
-        System.out.println("-----------------------------2.3-----------------------------------");
 
         Logger.i("门限" + upbound);
         return upbound;
