@@ -57,7 +57,13 @@ public class CountDouble {
      *
      * @return 运算结果, 返回1表示有人，0表示没人，-1表示计算错误
      */
-    public static int calDetection(double thresholdValue, List<String> dataList) {
+    public static double calDetection(double thresholdValue, List<String> dataList) {
+        double[][] Nor_subCSI = get_Nor_subCSI(dataList, 2);
+        double fvalue = get_Max_eig_per_win(Nor_subCSI);
+        return fvalue;
+    }
+
+    public static double cal_1st_win(double thresholdValue, List<String> dataList) {
         double[][] Nor_subCSI = get_Nor_subCSI(dataList, 2);
         double fvalue = get_Max_eig_per_win(Nor_subCSI);
         int res = -1;//结果1代表有人，0代表没人
@@ -69,30 +75,54 @@ public class CountDouble {
         return res;
     }
 
-    public static double[][] cal_1st_win(List<String> dataList) {
-        double[][] Nor_subCSI = get_Nor_subCSI(dataList, 2);
-        double[][] tempMatrix = get_temp_matrix_1st_win(Nor_subCSI);
+    public static double cal_next_win(double[][] Amplitude_CoffValue) {
+        Matrix A           = new Matrix(Amplitude_CoffValue);                   //对矩阵进行特征值分解
+        Matrix eigenValue1 = A.eig().getD();                                    //取出幅度特征值
+        // 归一化
+        double W1          = eigenValue1.trace();                               //求和
+        Logger.i("W1 = " + W1);
+        eigenValue1        = eigenValue1.times(1/W1);                           //归一化
+        double fvalue      = get_max_eig(Matrix_to_Array(eigenValue1, 50));//取出归一化之后的最大特征值
 
-        return tempMatrix;
+        return fvalue;
     }
 
-    /**
-     * 根据一个窗长的数据计算相关系数矩阵
-     *
-     * @param Nor_subCSI 输入列表数据
-     *
-     * @return 这个窗的，相关系数矩阵的一部分
-     */
-    public static double[][] get_temp_matrix_1st_win(double[][] Nor_subCSI) {
+    public static double[][] get_temp_matrix_next_win(List<String> dataList, double[][] temporary_matrix) {
 
+        double[][] Nor_subCSI = get_Nor_subCSI(dataList, 2);
         int len = Nor_subCSI.length;//窗长，取50
         double[][] newcsi1             = Nor_subCSI;
         double[][] Amplitude_CoffValue = new double[len][len];
-        double[][] temporary_matrix    = new double[len - 1][len - 1];
-        double[] normalized_max_eig    = new double[len];
 
-        for (int n = 0; n < len - 1; n++) {
-            for (int k = n; k < len - 1; k++) {
+        Amplitude_CoffValue = clone_to_array(temporary_matrix, Amplitude_CoffValue, 1,len-1,1,len-1);
+        int k = len - 1;
+        for (int n = 0; n < len; n++) {
+            double[] a = newcsi1[n];
+            double[] b = newcsi1[k];
+            double csi_cor = getPearsonCorrelationScore(a,b);            //求所有子载波幅值矢量之间的相关系数
+            Amplitude_CoffValue[n][k] = csi_cor;
+            Amplitude_CoffValue[k][n] = Amplitude_CoffValue[n][k];
+        }
+        // 返回相关系数矩阵
+        return Amplitude_CoffValue;
+    }
+    /**
+     * 根据一个窗长的数据计算相关系数矩阵
+     *
+     * @param dataList 输入列表数据
+     *
+     * @return 返回第一个窗的相关系数
+     * 矩阵
+     */
+    public static double[][] get_temp_matrix_1st_win(List<String> dataList) {
+
+        double[][] Nor_subCSI = get_Nor_subCSI(dataList, 2);
+        int len = Nor_subCSI.length;//窗长，取50
+        double[][] newcsi1             = Nor_subCSI;
+        double[][] Amplitude_CoffValue = new double[len][len];
+
+        for (int n = 0; n < len; n++) {
+            for (int k = n; k < len; k++) {
                 double[] a     = newcsi1[n];
                 double[] b     = newcsi1[k];
                 double csi_cor = getPearsonCorrelationScore(a,b);
@@ -101,10 +131,8 @@ public class CountDouble {
                 Amplitude_CoffValue[k][n] = Amplitude_CoffValue[n][k];
             }
         }
-        temporary_matrix = clone_to_array(Amplitude_CoffValue, temporary_matrix, 1, len-1, 1, len-1);
-
         // 返回最大特征值
-        return temporary_matrix;
+        return Amplitude_CoffValue;
     }
 
     /**
@@ -119,7 +147,6 @@ public class CountDouble {
         int len = Nor_subCSI.length;//窗长，取50
         double[][] newcsi1             = Nor_subCSI;
         double[][] Amplitude_CoffValue = new double[len][len];
-        double[][] temporary_matrix    = new double[len - 1][len - 1];
         double[] normalized_max_eig    = new double[len];
 
         for (int n = 0; n < len; n++) {
@@ -197,7 +224,6 @@ public class CountDouble {
 
             // 归一化
             double W1 = eigenValue1.trace();                                    //求和
-            Logger.i("trace = " + W1);
             eigenValue1 = eigenValue1.times(1/W1);                              //归一化
             double[][] eig_arr = Matrix_to_Array(eigenValue1, len);
             normalized_max_eig[i] = get_max_eig(eig_arr);                       //取出归一化之后的最大特征值

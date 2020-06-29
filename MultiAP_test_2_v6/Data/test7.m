@@ -1,0 +1,9 @@
+clc;clear all;close all;                          
+x1 = importdata('.\time_¾É°æ_´æ2¸ötxt.txt'); 
+x2 = importdata('.\time_ÐÂ°æ_´æ2¸ötxt.txt'); 
+x3 = importdata('.\time_¾É°æ.txt'); 
+x4 = importdata('.\time_ÐÂ°æ.txt'); 
+sum1 = sum(x1);
+sum2 = sum(x2);
+sum3 = sum(x3);
+sum4 = sum(x4);
