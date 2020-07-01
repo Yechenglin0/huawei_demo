@@ -1,0 +1,14 @@
+<component name="ArtifactManager">
+  <artifact name="MultiAP_test_2_v6:jar">
+    <output-path>$PROJECT_DIR$/out/artifacts/MultiAP_test_2_v6_jar</output-path>
+    <root id="root">
+      <element id="archive" name="MultiAP_test_2_v6.jar">
+        <element id="directory" name="META-INF">
+          <element id="file-copy" path="$PROJECT_DIR$/src/123/META-INF/MANIFEST.MF" />
+        </element>
+        <element id="module-output" name="MultiAP_test_2_v6" />
+      </element>
+      <element id="library" level="project" name="lib" />
+    </root>
+  </artifact>
+</component>
