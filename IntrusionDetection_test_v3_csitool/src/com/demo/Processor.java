@@ -12,15 +12,18 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static util.FileUtils.ROOT_DIR;
+import static util.FileUtils.STATIC_DATA_TXT;
+import static util.FileUtils.STATIC_FVALUE_TXT;
+import static util.FileUtils.STATIC_OUTPUT_TXT;
+import static util.FileUtils.STATIC_THRESHOLD_TXT;
+
 import static util.FileUtils.write2txt;
 
 public class Processor {
     // 滑窗大小
     private static final int WINDOW_SIZE = 50;
     // 阈值缓存文件名
-    private static final String STATIC_DATA_TXT = ROOT_DIR + "Data/data.txt";
-    private static final String STATIC_FVALUE_TXT = ROOT_DIR + "Data/fvalue.txt";
-    private static final String STATIC_OUTPUT_TXT = ROOT_DIR + "Data/output.txt";
+
 
     // 每秒接收10个数据，这个值关系到会采集多少静默数据（因为采集时间是按照分钟设定的）
     private static final int COUNTS_PER_SECOND = 1;
@@ -60,6 +63,8 @@ public class Processor {
                 double upBound = CountDouble.calUpbound(staticDataList);//根据静态数组计算阈值
                 Ap.setThresholdFromLink(collector, upBound);
                 Activator.textArea.append("阈值结果为：" + upBound + '\n');
+                write2txt(STATIC_THRESHOLD_TXT, String.valueOf(upBound) );
+
                 collector.setMinutesOfCollectingSilentData(0);          //采集过了就设置为不需要再采集了
             }
         } else if (Ap.getThresholdFromLink(collector) != null) {
@@ -85,7 +90,6 @@ public class Processor {
                 tempMatrix = CountDouble.get_temp_matrix_next_win(apDataList, tempMatrix);
                 Ap.setTempMatrixFromLink(collector, tempMatrix);
                 double fvalue = CountDouble.cal_next_win(tempMatrix);//简便计算
-
                 int at = fvalue < thresholdValue * 0.975 ? 1 : 0;//结果1代表有人，0代表没人
 
                 if (1 == save_txt) {//记录最大特征值变化情况
@@ -116,7 +120,7 @@ public class Processor {
                     Activator.textArea.setSelectionStart(Activator.textArea.getText().length());
                     List<Integer> invadedList2 = new ArrayList<>();
                     Ap.setInvadedListFromLink(collector, invadedList2);//清空列表
-                    write2txt(STATIC_OUTPUT_TXT, String.valueOf(flag) + String.valueOf(count2) );
+                    write2txt(STATIC_OUTPUT_TXT, String.valueOf(flag) +" "+ String.valueOf(count2) );
                 }
             }
         } else if (Ap.getThresholdFromLink(collector) == null) {

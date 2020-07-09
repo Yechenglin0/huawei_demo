@@ -3,6 +3,8 @@ package util;
 import java.io.File;
 import java.io.IOException;
 import java.io.RandomAccessFile;
+import java.text.SimpleDateFormat;
+import java.util.Date;
 
 /**
  * 文件工具类
@@ -10,7 +12,14 @@ import java.io.RandomAccessFile;
  */
 public class FileUtils {
 
-    public static String ROOT_DIR = "F:/0609代码/MultiAP_test_2/";//必须以/结尾，否则出错
+
+
+    public static String df = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());//设置日期格式
+    public static String ROOT_DIR = "./Data/" + df + "/";//必须以/结尾，否则出错
+    public static String STATIC_DATA_TXT = ROOT_DIR + "data.txt";
+    public static String STATIC_FVALUE_TXT = ROOT_DIR + "fvalue.txt";
+    public static String STATIC_OUTPUT_TXT = ROOT_DIR + "output.txt";
+    public static String STATIC_THRESHOLD_TXT = ROOT_DIR + "threshold.txt";
 //      System.out.println(Paths.get(".").toAbsolutePath()); --> /openee/osgi/.
 //     	System.out.println(context.getDataFile(null));  --> null
 //    	System.out.println(context.getDataFile(""));   --> ./data/runtime/bundle29/data
