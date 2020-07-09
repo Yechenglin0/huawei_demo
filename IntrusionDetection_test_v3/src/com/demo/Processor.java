@@ -12,15 +12,15 @@ import java.text.SimpleDateFormat;
 import java.util.*;
 
 import static util.FileUtils.ROOT_DIR;
+import static util.FileUtils.STATIC_DATA_TXT;
+import static util.FileUtils.STATIC_FVALUE_TXT;
+import static util.FileUtils.STATIC_OUTPUT_TXT;
 import static util.FileUtils.write2txt;
 
 public class Processor {
     // 滑窗大小
     private static final int WINDOW_SIZE = 50;
     // 阈值缓存文件名
-    private static final String STATIC_DATA_TXT = ROOT_DIR + "Data/data.txt";
-    private static final String STATIC_FVALUE_TXT = ROOT_DIR + "Data/fvalue.txt";
-    private static final String STATIC_OUTPUT_TXT = ROOT_DIR + "Data/output.txt";
 
     // 每秒接收10个数据，这个值关系到会采集多少静默数据（因为采集时间是按照分钟设定的）
     private static final int COUNTS_PER_SECOND = 1;
@@ -38,6 +38,9 @@ public class Processor {
      * @param csi 得到的Csi的包
      */
     public static void processReceiveCsi(CsiInfo csi, int data_num, int threshold_num, int save_txt) {
+
+
+
 
         if (1 == save_txt) {//存储原始数据
             String format = csi.toString();
@@ -103,12 +106,12 @@ public class Processor {
                     String output;
                     for (int i = 0; i < invadedList.size(); i++) { sum = sum + invadedList.get(i); }
                     if (sum > invadedList.size() * 0.4) {
-                        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
-                        output = "有人入侵！！！" + df.format(new Date()) + '\n';
+                        SimpleDateFormat df2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
+                        output = "有人入侵！！！" + df2.format(new Date()) + '\n';
                         flag = 1;
                     } else {
-                        SimpleDateFormat df = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
-                        output = "安全！        " + df.format(new Date()) + '\n';
+                        SimpleDateFormat df2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
+                        output = "安全！        " + df2.format(new Date()) + '\n';
                         flag = 0;
                     }
                     Activator.textArea.append(output);
