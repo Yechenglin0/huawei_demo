@@ -24,16 +24,16 @@ public class CsiInfo {
 	private double[] total_ant4_amp;
 	private String[] total_mac;
 
-
 	@Override
 	public String toString() {
-		return  "{total_timestamp=" + Arrays.toString(total_timestamp) +
-				", total_ant1_amp=" + Arrays.toString(total_ant1_amp) +
-				", total_ant2_amp=" + Arrays.toString(total_ant2_amp) +
-				", total_ant3_amp=" + Arrays.toString(total_ant3_amp) +
-				", total_ant4_amp=" + Arrays.toString(total_ant4_amp) +
-				", total_mac=" + Arrays.toString(total_mac) +
-				'}';
+		String str = "";
+		for (int i = 0; i < 30; i++) {
+			str = str + timestamp + " " + String.valueOf(total_ant1_amp[i]) + " " + String.valueOf(total_ant2_amp[i]) + " "  + String.valueOf(total_ant3_amp[i]) + " "  + String.valueOf(total_ant4_amp[i]) + " "  + mac;
+			if (i != 29) {
+				str = str + '\n';
+			}
+		}
+		return str;
 	}
 
 	public String toJsonString(CsiInfo csiInfo) {

@@ -3,11 +3,11 @@ package domain;
 import java.io.*;
 import java.net.*;
 
-public class SendSock {
+public class Sendsock2 {
     static int count2 = 0;
     public static void main(String[] args) throws IOException {
-        FileReader fr = new FileReader("4s_4d_4s_json.txt");
-        DatagramSocket ds = new DatagramSocket(8080);
+        FileReader fr = new FileReader("4s_4d_4s_json_2.txt");
+        DatagramSocket ds = new DatagramSocket(8081);
 
         int len;
         int count = 0;

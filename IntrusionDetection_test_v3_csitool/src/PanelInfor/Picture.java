@@ -24,7 +24,5 @@ public class Picture {
         frame.setVisible(true);
         Thread.sleep(500);
         frame.setVisible(false);
-       
-        
     }
 }

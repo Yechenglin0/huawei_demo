@@ -70,13 +70,6 @@ public class CountDouble {
         return res;
     }
 
-    /**
-     * 根据一个窗长的数据计算相关系数矩阵的最大特征值，并与门限判断
-     *
-     * @param Amplitude_CoffValue 信号的相关系数矩阵
-     *
-     * @return 运算结果, 返回信号相关系数矩阵的归一化最大特征值
-     */
     public static double cal_next_win(double[][] Amplitude_CoffValue) {
         Matrix A           = new Matrix(Amplitude_CoffValue);                   //对矩阵进行特征值分解
         Matrix eigenValue1 = A.eig().getD();                                    //取出幅度特征值
@@ -88,16 +81,6 @@ public class CountDouble {
         return fvalue;
     }
 
-    /**
-     * 根据一个窗长的数据计算相关系数矩阵的最大特征值，并与门限判断
-     *
-     * @param dataList 这一个窗的信号
-     *
-     * @param temporary_matrix 上一组信号的相关系数矩阵
-     *
-     * @return 运算结果, 返回信号相关系数矩阵的归一化最大特征值
-     *
-     */
     public static double[][] get_temp_matrix_next_win(List<String> dataList, double[][] temporary_matrix) {
 
         double[][] Nor_subCSI = get_Nor_subCSI(dataList, 2);
@@ -117,7 +100,6 @@ public class CountDouble {
         // 返回相关系数矩阵
         return Amplitude_CoffValue;
     }
-
     /**
      * 根据一个窗长的数据计算相关系数矩阵
      *
@@ -256,7 +238,7 @@ public class CountDouble {
      */
     public static double[][] get_Nor_subCSI(List<String> staticDataList, int ant_num) {
 
-        // 提取每个包的CSI幅值数据,进行天线选择，最后得到一个60*30的二维数组
+        // 提取每个包的CSI幅值数据,进行天线选择，最后得到一个的二维数组
         Gson gson = new Gson();
         String timestamp = new String();
         double[][] ant1_amp = new double[staticDataList.size()][30];
@@ -279,18 +261,23 @@ public class CountDouble {
         {
             case 1 :
                 Nor_subCSI = ant1_amp;
+                Logger.i("天线选择1");
                 break;
             case 2 :
                 Nor_subCSI = ant2_amp;
+                Logger.i("天线选择2");
                 break;
             case 3 :
                 Nor_subCSI = ant3_amp;
+                Logger.i("天线选择3");
                 break;
             case 4 :
                 Nor_subCSI = ant4_amp;
+                Logger.i("天线选择4");
                 break;
             default :
                 Nor_subCSI = ant2_amp;
+                Logger.i("未定义天线，默认选择2");
         }
         return Nor_subCSI;
     }

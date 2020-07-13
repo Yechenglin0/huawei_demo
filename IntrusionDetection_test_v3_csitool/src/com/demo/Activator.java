@@ -136,8 +136,8 @@ public class Activator {
                                 // case 4:csi.set_total_ant4_amp(total_ant_amp);break;
                                 default:break;
                             }
-
-                            csi.set_mac("AABBCCDDEEFF");
+                            int apmac = dataArray[213] - 'a';//为什么最后一位是apmac值
+                            csi.set_mac(String.valueOf(apmac));
                             csi.set_timestamp("[2019-05-1917:47:50.352180]");
 
                         }
