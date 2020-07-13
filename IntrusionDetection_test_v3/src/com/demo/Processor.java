@@ -2,6 +2,7 @@ package com.demo;
 
 import domain.CsiInfo;
 import domain.Ap;
+import domain.InvadedList;
 import util.Caches;
 import util.CountDouble;
 import util.DateUtils;
@@ -11,11 +12,7 @@ import javax.swing.*;
 import java.text.SimpleDateFormat;
 import java.util.*;
 
-import static util.FileUtils.ROOT_DIR;
-import static util.FileUtils.STATIC_DATA_TXT;
-import static util.FileUtils.STATIC_FVALUE_TXT;
-import static util.FileUtils.STATIC_OUTPUT_TXT;
-import static util.FileUtils.write2txt;
+import static util.FileUtils.*;
 
 public class Processor {
     // 滑窗大小
@@ -25,6 +22,8 @@ public class Processor {
     // 每秒接收10个数据，这个值关系到会采集多少静默数据（因为采集时间是按照分钟设定的）
     private static final int COUNTS_PER_SECOND = 1;
     private static int count2 = 0;
+    public static String ROOT_DIR = "./Data/";//必须以/结尾，否则出错
+
     /**
      * 预处理：加载之前可能有的阈值文件，并存储进当前阈值；
      * 判断是否有静态数据，如果有则计算阈值，没有则等待数据到600再计算
@@ -38,17 +37,15 @@ public class Processor {
      * @param csi 得到的Csi的包
      */
     public static void processReceiveCsi(CsiInfo csi, int data_num, int threshold_num, int save_txt) {
+        InvadedList invadedList = Caches.getOrCreateInvadedList();
 
-
-
-
+        String mac = csi.get_mac();
         if (1 == save_txt) {//存储原始数据
             String format = csi.toString();
-            write2txt(STATIC_DATA_TXT, format);
+            write2txt( ROOT_DIR + mac + STATIC_DATA_TXT, format);
         }
 
-        Ap collector = Caches.getOrCreateAp(csi.get_mac());
-
+        Ap collector = Caches.getOrCreateAp(mac);
         if (Ap.getThresholdFromLink(collector) != null && Ap.getThresholdFromLink(collector) != 0) {
             collector.setMinutesOfCollectingSilentData(0);          //采集过了就设置为不需要再采集了
         }
@@ -59,14 +56,15 @@ public class Processor {
             Logger.i("静态数据长度:" + staticDataList.size());
             if (staticDataList.size() >= collector.getMinutesOfCollectingSilentData() * threshold_num * COUNTS_PER_SECOND) {//已经采集够了足够的数据
 
-                Activator.textArea.append("已经收到" + staticDataList.size() + "个包，开始阈值计算" + '\n');
+                Activator.textArea.append("AP：" + mac + " 已经收到" + staticDataList.size() + "个包，开始阈值计算" + '\n');
                 double upBound = CountDouble.calUpbound(staticDataList);//根据静态数组计算阈值
                 Ap.setThresholdFromLink(collector, upBound);
-                Activator.textArea.append("阈值结果为：" + upBound + '\n');
+                Activator.textArea.append("AP：" + mac + " 阈值结果为：" + upBound + '\n');
+                write2txt(ROOT_DIR + mac + STATIC_THRESHOLD_TXT, String.valueOf(upBound));
+
                 collector.setMinutesOfCollectingSilentData(0);          //采集过了就设置为不需要再采集了
             }
         } else if (Ap.getThresholdFromLink(collector) != null) {
-
             List<String> apDataList = Ap.getDataListFromLink(collector);
             Double thresholdValue   = Ap.getThresholdFromLink(collector); //获得阈值
 
@@ -80,6 +78,7 @@ public class Processor {
                 double[][] tempMatrix = CountDouble.get_temp_matrix_1st_win(apDataList);//计算结果：0代表没人，1代表有人
                 Ap.setTempMatrixFromLink(collector, tempMatrix);
             }
+
             if (apDataList.size() > WINDOW_SIZE) { //够了窗长个就计算并去掉第一个
                 apDataList.remove(0);
                 Ap.setDataListFromLink(collector, apDataList);
@@ -91,21 +90,22 @@ public class Processor {
                 int at = fvalue < thresholdValue * 0.975 ? 1 : 0;//结果1代表有人，0代表没人
 
                 if (1 == save_txt) {//记录最大特征值变化情况
-                    write2txt(STATIC_FVALUE_TXT, String.valueOf(fvalue));
+                    write2txt(ROOT_DIR + mac + STATIC_FVALUE_TXT, String.valueOf(fvalue));
                 }
                 count2 = count2 + 1;
                 Logger.i("接受到" + count2 + "个包");
 
-                List<Integer> invadedList = Ap.getInvadedListFromLink(collector);
-                invadedList.add(at);
-                Ap.setInvadedListFromLink(collector,invadedList);
-                if (invadedList.size() >= data_num) {
-
+                //开始检测是否有人入侵
+                List<Integer> list = InvadedList.getInvadedListFromLink(invadedList);//获得当前的结果列表
+                list.add(at);//将每个包的结果存入列表中
+                InvadedList.setInvadedListFromLink(invadedList,list);
+                int ap_num = InvadedList.getApnumFromLink(invadedList);
+                if (list.size() >= data_num) {//单AP条件下，每 data_num个包判断一次
                     int sum = 0;
                     int flag = -1;
                     String output;
-                    for (int i = 0; i < invadedList.size(); i++) { sum = sum + invadedList.get(i); }
-                    if (sum > invadedList.size() * 0.4) {
+                    for (int i = 0; i < list.size(); i++) { sum = sum + list.get(i); }
+                    if (sum > list.size() * 0.4) {
                         SimpleDateFormat df2 = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");//设置日期格式
                         output = "有人入侵！！！" + df2.format(new Date()) + '\n';
                         flag = 1;
@@ -114,11 +114,13 @@ public class Processor {
                         output = "安全！        " + df2.format(new Date()) + '\n';
                         flag = 0;
                     }
+                    Activator.textArea.append("当前Ap个数：" + ap_num + "\n");
                     Activator.textArea.append(output);
                     Activator.textArea.setSelectionStart(Activator.textArea.getText().length());
                     List<Integer> invadedList2 = new ArrayList<>();
-                    Ap.setInvadedListFromLink(collector, invadedList2);//清空列表
-                    write2txt(STATIC_OUTPUT_TXT, String.valueOf(flag) + String.valueOf(count2) );
+
+                    InvadedList.setInvadedListFromLink(invadedList, invadedList2);//清空列表
+                    write2txt(ROOT_DIR + mac + STATIC_OUTPUT_TXT, String.valueOf(flag) + String.valueOf(count2) );
                 }
             }
         } else if (Ap.getThresholdFromLink(collector) == null) {

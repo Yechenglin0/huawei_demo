@@ -12,12 +12,13 @@ import java.util.Date;
  */
 public class FileUtils {
 
-    public static String ROOT_DIR = "./";//必须以/结尾，否则出错
+    public static String ROOT_DIR = "./Data/";//必须以/结尾，否则出错
     public static String df = new SimpleDateFormat("yyyyMMddHHmmss").format(new Date());//设置日期格式
 
-    public static String STATIC_DATA_TXT = ROOT_DIR + "Data/data_"+ df +".txt";
-    public static String STATIC_FVALUE_TXT = ROOT_DIR + "Data/fvalue_"+ df +".txt";
-    public static String STATIC_OUTPUT_TXT = ROOT_DIR + "Data/output_"+ df +".txt";
+    public static String STATIC_DATA_TXT = "/" + df +"/data.txt";
+    public static String STATIC_FVALUE_TXT = "/" + df +"/fvalue.txt";
+    public static String STATIC_OUTPUT_TXT = "/" +df +"/output.txt";
+    public static String STATIC_THRESHOLD_TXT = "/" + df +"/threshold.txt";
 
 //      System.out.println(Paths.get(".").toAbsolutePath()); --> /openee/osgi/.
 //     	System.out.println(context.getDataFile(null));  --> null

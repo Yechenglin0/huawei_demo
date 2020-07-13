@@ -1,7 +1,5 @@
 package domain;
 
-import util.Logger;
-
 import java.util.ArrayList;
 import java.util.List;
 import java.util.Map;
@@ -17,7 +15,7 @@ public class Ap {
     private List<Integer> invadedList;//结果队列
 
     private int minutesOfCollectingSilentData;//需要采集的静态数据时间 0代表不需要，1代表需要采集1分钟，2代表两分钟，以此类推
-    private  double[][] tempMatrix;
+    private double[][] tempMatrix;
 
     //getter和setter
     public String getMac() {
